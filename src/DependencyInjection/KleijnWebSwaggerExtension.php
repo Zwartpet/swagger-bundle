@@ -25,10 +25,11 @@ class KleijnWebSwaggerExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
         $container->setParameter('swagger.document.base_path', $config['document']['base_path']);
+        $container->setParameter('phpapi.router_name', 'swagger');
 
         if (isset($config['document']['cache'])) {
             $resolverDefinition = $container->getDefinition('swagger.description.repository');
@@ -49,6 +50,11 @@ class KleijnWebSwaggerExtension extends Extension
         if ($config['validate_responses']) {
             $responseFactory->addArgument(new Reference('swagger.request.validator'));
         }
+        if ($config['ok_status_resolver']) {
+            $responseFactory->addArgument(new Reference($config['ok_status_resolver']));
+        }
+
+        $container->setParameter('swagger.match_unsecured', $config['security']['match_unsecured']);
     }
 
     /**

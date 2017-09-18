@@ -1,4 +1,6 @@
 # KleijnWeb\SwaggerBundle 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/dcd0367a-0371-443a-b258-5c9356cbc953/small.png)](https://insight.sensiolabs.com/projects/dcd0367a-0371-443a-b258-5c9356cbc953)
+
 [![Build Status](https://travis-ci.org/kleijnweb/swagger-bundle.svg?branch=master)](https://travis-ci.org/kleijnweb/swagger-bundle)
 [![Coverage Status](https://coveralls.io/repos/github/kleijnweb/swagger-bundle/badge.svg?branch=master)](https://coveralls.io/github/kleijnweb/swagger-bundle?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kleijnweb/swagger-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kleijnweb/swagger-bundle/?branch=master)
@@ -9,7 +11,9 @@ Invert your workflow (contract first) using Swagger ([Open API](https://openapis
 
 Aimed to be lightweight, this bundle does not depend on FOSRestBundle or Twig.
 
-**HEADS UP:** _You are looking at the main (4.0 ALPHA) development line, which is PHP 7 only. SwaggerBundle 3.x is stable, maintained, and works with PHP 5.4+._
+**HEADS UP:** _You are looking at the main (4.0 BETA) development line, which is PHP 7 only. SwaggerBundle 3.x is stable, maintained, and works with PHP 5.4+._
+
+For a working example, check out https://github.com/kleijnweb/swagger-bundle-example.
 
 ## Contract First
 
@@ -29,7 +33,15 @@ Check out the [User Documentation](docs.md) for more details.
 
 ## What's new in 4.0?
 
-SwaggerBundle 4.0 is currently in the alpha stage. Much of the behavior dealing with OpenAPI documents has been moved to [KleijnWeb\PhpApi\Descriptions](https://github.com/kleijnweb/php-api-descriptions).
+SwaggerBundle 4.0 is currently in the beta stage. Much of the behavior dealing with OpenAPI documents has been moved to [KleijnWeb\PhpApi\Descriptions](https://github.com/kleijnweb/php-api-descriptions).
+
+### Routing
+ 
+Now using [kleijnweb/php-api-routing-bundle](https://github.com/kleijnweb/php-api-routing-bundle) with a number of small improvements.
+
+### Security Integration
+ 
+Request matching, voting, OpenAPI configured RBAC. See [docs](docs.md#security).
 
 ### Serialization
  
@@ -39,19 +51,11 @@ Support for 3rd party serializers has been replaced by a new _API Description Ba
  
 The dependency on `SwaggerAssertions` has been removed, as response validation is now facilitated by `KleijnWeb\PhpApi\Descriptions` and [integrated into the request cycle](docs.md#testing).
 
-### Errors
+### Errors And Exceptions
  
-`vnd.error` support has been removed in favor of simpler error responses. This also gets rid of some dependencies that were unneeded for most use cases.
+ - `vnd.error` support has been removed in favor of simpler error responses. This also gets rid of some dependencies that were unneeded for most use cases.
+ - `HttpError` now supports `AccessDeniedException`.
 
-## What's the roadmap?
-
- - 4.0 ALPHA: 3.x compatibility plugins, registry controller
- - 4.0 BETA: feature freeze, refactoring, lots of testing.
- - 4.0 STABLE
- - 4.1: Stubbing
- - 4.2: Proxying, definition registry
- - 4.3: Service routing, [EIP](https://en.wikipedia.org/wiki/Enterprise_Integration_Patterns) recipes.
- 
 ## FAQ
  
   - Will SwaggerBundle do `x`?
@@ -63,6 +67,10 @@ The dependency on `SwaggerAssertions` has been removed, as response validation i
   * Support Symfony sub-requests. You won't miss them.
   * Support XML.
   
+## Symfony Compatibility
+ 
+SwaggerBundle is tested against Symfony 2.8.7 and the latest release (3.x.x), at least once a week.
+
 ## Notes
  
 Go to the [release page](https://github.com/kleijnweb/swagger-bundle/releases) to find details about the latest release.

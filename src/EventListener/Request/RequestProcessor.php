@@ -14,8 +14,9 @@ use KleijnWeb\PhpApi\Descriptions\Description\Schema\Validator\SchemaValidator;
 use KleijnWeb\PhpApi\Descriptions\Request\RequestParameterAssembler;
 use KleijnWeb\PhpApi\Hydrator\DateTimeSerializer;
 use KleijnWeb\PhpApi\Hydrator\ObjectHydrator;
-use KleijnWeb\SwaggerBundle\Exception\ValidationException;
+use KleijnWeb\PhpApi\RoutingBundle\Routing\RequestMeta;
 use KleijnWeb\SwaggerBundle\Exception\MalformedContentException;
+use KleijnWeb\SwaggerBundle\Exception\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -80,15 +81,11 @@ class RequestProcessor
      */
     public function process(Request $request)
     {
-        if (!$request->attributes->has(RequestMeta::ATTRIBUTE_URI)) {
-            throw  new \UnexpectedValueException("Missing document URI");
+        if (!$requestMeta = RequestMeta::fromRequest($request, $this->repository)) {
+            throw new \UnexpectedValueException("Not a SwaggerBundle request");
         }
-        $description = $this->repository->get($request->attributes->get(RequestMeta::ATTRIBUTE_URI));
-        $operation   = $description
-            ->getPath($request->attributes->get(RequestMeta::ATTRIBUTE_PATH))
-            ->getOperation(
-                $request->getMethod()
-            );
+
+        $operation = $requestMeta->getOperation();
 
         $body = null;
         if ($request->getContent()) {
@@ -98,19 +95,25 @@ class RequestProcessor
             }
         }
 
-        $result = $this->validator->validate(
-            $operation->getRequestSchema(),
-            $coercedParams = $this->parametersAssembler->assemble(
-                $operation,
-                $request->query->all(),
-                $request->attributes->all(),
-                $request->headers->all(),
-                $body
-            )
+        $coercedParams = $this->parametersAssembler->assemble(
+            $operation,
+            $request->query->all(),
+            $request->attributes->all(),
+            $request->headers->all(),
+            $body
         );
 
+        $result = $this->validator->validate(
+            $operation->getRequestSchema(),
+            !$operation->hasParameters() && !count((array)$coercedParams) ? null : $coercedParams
+        );
+
+        if (!$result->isValid()) {
+            throw new ValidationException($result->getErrorMessages());
+        }
+
         foreach ($coercedParams as $attribute => $value) {
-            /** @var ScalarSchema  $schema*/
+            /** @var ScalarSchema $schema */
             if (($schema = $operation->getParameter($attribute)->getSchema()) instanceof ScalarSchema) {
                 if ($schema->isDateTime()) {
                     $value = $this->dateTimeSerializer->deserialize($value, $schema);
@@ -120,19 +123,12 @@ class RequestProcessor
             $request->attributes->set($attribute, $value);
         }
         if ($this->hydrator
-            && $bodyParam = $description->getRequestBodyParameter($operation->getPath(), $operation->getMethod())
+            && $bodyParam = $requestMeta
+                ->getDescription()
+                ->getRequestBodyParameter($operation->getPath(), $operation->getMethod())
         ) {
             $body = $this->hydrator->hydrate($body, $bodyParam->getSchema());
             $request->attributes->set($bodyParam->getName(), $body);
-        }
-
-        $request->attributes->set(
-            RequestMeta::ATTRIBUTE,
-            new RequestMeta($description, $operation)
-        );
-
-        if (!$result->isValid()) {
-            throw new ValidationException($result->getErrorMessages());
         }
     }
 }

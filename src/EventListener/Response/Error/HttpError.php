@@ -10,8 +10,10 @@ namespace KleijnWeb\SwaggerBundle\EventListener\Response\Error;
 
 use KleijnWeb\SwaggerBundle\Exception\ValidationException;
 use Psr\Log\LogLevel;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -42,11 +44,6 @@ class HttpError
     private $message;
 
     /**
-     * @var Request
-     */
-    private $request;
-
-    /**
      * @var \Exception
      */
     private $exception;
@@ -54,13 +51,12 @@ class HttpError
     /**
      * HttpError constructor.
      *
-     * @param Request       $request
-     * @param \Exception    $exception
-     * @param LogRefBuilder $logRefBuilder
+     * @param Request                $request
+     * @param \Exception             $exception
+     * @param LogRefBuilderInterface $logRefBuilder
      */
-    public function __construct(Request $request, \Exception $exception, LogRefBuilder $logRefBuilder)
+    public function __construct(Request $request, \Exception $exception, LogRefBuilderInterface $logRefBuilder)
     {
-        $this->request   = $request;
         $this->exception = $exception;
         $this->logRef    = $logRefBuilder->create($request, $exception);
 
@@ -83,6 +79,9 @@ class HttpError
                 $this->severity   = LogLevel::WARNING;
             } elseif ($exception instanceof AuthenticationException) {
                 $this->statusCode = Response::HTTP_UNAUTHORIZED;
+                $this->severity   = LogLevel::WARNING;
+            } elseif ($exception instanceof AccessDeniedException || $exception instanceof AccessDeniedHttpException) {
+                $this->statusCode = Response::HTTP_FORBIDDEN;
                 $this->severity   = LogLevel::WARNING;
             } else {
                 if (strlen((string)$code) !== 3) {

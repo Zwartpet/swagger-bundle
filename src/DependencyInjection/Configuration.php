@@ -26,16 +26,20 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-            ->scalarNode('validate_responses')->defaultFalse()
+            ->booleanNode('validate_responses')->defaultFalse()
+            ->end()
+            ->scalarNode('ok_status_resolver')->defaultFalse()
             ->end()
             ->arrayNode('hydrator')
             ->children()
             ->arrayNode('namespaces')->isRequired()
             ->beforeNormalization()
             ->ifString()
-            ->then(function ($v) {
-                return [$v];
-            })
+            ->then(
+                function ($v) {
+                    return [$v];
+                }
+            )
             ->end()
             ->prototype('scalar')
             ->end()
@@ -45,7 +49,14 @@ class Configuration implements ConfigurationInterface
             ->arrayNode('document')
             ->addDefaultsIfNotSet()
             ->children()
-            ->scalarNode('cache')->isRequired()->defaultFalse()->end()->scalarNode('base_path')->defaultValue('')->end()
+            ->scalarNode('cache')->isRequired()->defaultFalse()->end()
+            ->scalarNode('base_path')->defaultValue('')->end()
+            ->end()
+            ->end()
+            ->arrayNode('security')
+            ->addDefaultsIfNotSet()
+            ->children()
+            ->booleanNode('match_unsecured')->defaultFalse()->end()
             ->end()
             ->end()
             ->end();

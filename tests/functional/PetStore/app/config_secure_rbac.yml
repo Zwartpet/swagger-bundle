@@ -1,0 +1,31 @@
+imports:
+  - { resource: config.yml }
+
+security:
+  firewalls:
+    secure:
+      http_basic: ~
+      provider: in_memory
+      swagger: { rbac: true }
+
+  encoders:
+    Symfony\Component\Security\Core\User\User: plaintext
+
+  providers:
+    in_memory:
+      memory:
+        users:
+          guest:
+             password: password
+             roles: 'ROLE_GUEST'
+          user:
+             password: password
+             roles: 'ROLE_USER'
+          admin:
+             password: password
+             roles: 'ROLE_ADMIN'
+
+  role_hierarchy:
+      ROLE_GUEST: [IS_AUTHENTICATED_FULLY]
+      ROLE_USER: [IS_AUTHENTICATED_FULLY]
+      ROLE_ADMIN: [ROLE_USER]

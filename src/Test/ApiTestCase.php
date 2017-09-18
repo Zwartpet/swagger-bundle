@@ -42,10 +42,12 @@ trait ApiTestCase
     protected function createApiTestClient()
     {
         return $this->client = new ApiTestClient(
-            static::createClient([
-                'environment' => $this->getEnv(),
-                'debug'       => true
-            ])
+            static::createClient(
+                [
+                    'environment' => $this->getEnv(),
+                    'debug'       => true,
+                ]
+            )
         );
     }
 
@@ -68,38 +70,25 @@ trait ApiTestCase
     /**
      * @param string $path
      * @param array  $params
+     * @param array  $server
      *
      * @return mixed
-     * @throws ApiResponseErrorException
      */
-    protected function get(string $path, array $params = [])
+    protected function get(string $path, array $params = [], array $server = [])
     {
-        return $this->request($path, 'GET', $params);
+        return $this->request($path, 'GET', $params, null, $server);
     }
 
     /**
      * @param string $path
      * @param array  $params
+     * @param array  $server
      *
      * @return mixed
-     * @throws ApiResponseErrorException
      */
-    protected function delete(string $path, array $params = [])
+    protected function delete(string $path, array $params = [], array $server = [])
     {
-        return $this->request($path, 'DELETE', $params);
-    }
-
-    /**
-     * @param string $path
-     * @param array  $content
-     * @param array  $params
-     *
-     * @return mixed
-     * @throws ApiResponseErrorException
-     */
-    protected function patch(string $path, array $content, array $params = [])
-    {
-        return $this->request($path, 'PATCH', $params, $content);
+        return $this->request($path, 'DELETE', $params, null, $server);
     }
 
     /**
@@ -107,12 +96,12 @@ trait ApiTestCase
      * @param array  $content
      * @param array  $params
      *
+     * @param array  $server
      * @return mixed
-     * @throws ApiResponseErrorException
      */
-    protected function post(string $path, array $content, array $params = [])
+    protected function patch(string $path, array $content, array $params = [], array $server = [])
     {
-        return $this->request($path, 'POST', $params, $content);
+        return $this->request($path, 'PATCH', $params, $content, $server);
     }
 
     /**
@@ -120,12 +109,25 @@ trait ApiTestCase
      * @param array  $content
      * @param array  $params
      *
+     * @param array  $server
      * @return mixed
-     * @throws ApiResponseErrorException
      */
-    protected function put(string $path, array $content, array $params = [])
+    protected function post(string $path, array $content, array $params = [], array $server = [])
     {
-        return $this->request($path, 'PUT', $params, $content);
+        return $this->request($path, 'POST', $params, $content, $server);
+    }
+
+    /**
+     * @param string $path
+     * @param array  $content
+     * @param array  $params
+     *
+     * @param array  $server
+     * @return mixed
+     */
+    protected function put(string $path, array $content, array $params = [], array $server = [])
+    {
+        return $this->request($path, 'PUT', $params, $content, $server);
     }
 
     /**
@@ -133,14 +135,22 @@ trait ApiTestCase
      * @param string     $method
      * @param array      $params
      * @param array|null $content
+     * @param array      $server
      *
      * @return mixed
      * @throws ApiResponseErrorException
      */
-    protected function request(string $path, string $method, array $params = [], array $content = null)
-    {
+    protected function request(
+        string $path,
+        string $method,
+        array $params = [],
+        array $content = null,
+        array $server = []
+    ) {
         $apiRequest = new ApiRequest($this->assembleUri($path, $params), $method);
-        $apiRequest->setServer(array_merge(['CONTENT_TYPE' => 'application/json'], $this->getDefaultServerVars()));
+        $apiRequest->setServer(
+            array_merge($server, ['CONTENT_TYPE' => 'application/json'], $this->getDefaultServerVars())
+        );
 
         if ($content !== null) {
             $apiRequest->setContent(json_encode($content));
@@ -159,7 +169,7 @@ trait ApiTestCase
             $this->assertSame(
                 JSON_ERROR_NONE,
                 json_last_error(),
-                "Not valid JSON: " . json_last_error_msg() . "(" . var_export($content, true) . ")"
+                "Not valid JSON: ".json_last_error_msg()."(".var_export($content, true).")"
             );
         }
 
@@ -181,7 +191,7 @@ trait ApiTestCase
     {
         $uri = $path;
         if (count($params)) {
-            $uri = $path . '?' . http_build_query($params);
+            $uri = $path.'?'.http_build_query($params);
         }
 
         return $uri;
