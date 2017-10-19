@@ -138,6 +138,5 @@ class VndParameterValidationErrorTest extends WebTestCase
             return;
         }
         $this->fail("Expected exception");
-
     }
 }

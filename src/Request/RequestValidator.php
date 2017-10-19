@@ -91,7 +91,7 @@ class RequestValidator
 
         $parameters = new \stdClass;
 
-        if(isset($this->operationObject->getDefinition()->parameters)) {
+        if (isset($this->operationObject->getDefinition()->parameters)) {
             foreach ($this->operationObject->getDefinition()->parameters as $paramDefinition) {
                 $paramName = $paramDefinition->name;
 

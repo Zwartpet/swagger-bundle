@@ -30,7 +30,6 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
             return;
         }
         $this->fail("Expected ResourceNotReadableException");
-
     }
 
     /**

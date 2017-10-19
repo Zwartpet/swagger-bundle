@@ -60,10 +60,8 @@ class VndValidationErrorFactory
                 $path         = $this->refBuilder->createParameterSchemaPointer($request, $normalizedPropertyName);
                 $data['path'] = $path;
                 $parameterDefinitionUri = $this->refBuilder->buildSpecificationLink($request, $normalizedPropertyName);
-
             } catch (\InvalidArgumentException $e) {
                 $parameterDefinitionUri = "$documentLink";
-
             }
 
             $validationError = new Hal($parameterDefinitionUri, $data);

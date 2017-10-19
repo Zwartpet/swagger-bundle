@@ -77,7 +77,7 @@ class VndErrorExceptionListener
                 $statusCode = Response::HTTP_BAD_REQUEST;
                 $vndError   = $this->validationErrorFactory->create($request, $exception, $logRef);
             } else {
-                switch(true) {
+                switch (true) {
                     case $exception instanceof NotFoundHttpException:
                         $statusCode = Response::HTTP_NOT_FOUND;
                         $severity   = LogLevel::INFO;

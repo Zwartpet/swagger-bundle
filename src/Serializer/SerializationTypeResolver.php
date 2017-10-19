@@ -21,7 +21,7 @@ class SerializationTypeResolver
      */
     public function __construct($resourceNamespaces = null)
     {
-        if(!is_array($resourceNamespaces)) {
+        if (!is_array($resourceNamespaces)) {
             $resourceNamespaces = [$resourceNamespaces];
         }
         $this->resourceNamespaces = $resourceNamespaces;

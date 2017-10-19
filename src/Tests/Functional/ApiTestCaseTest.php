@@ -48,6 +48,5 @@ class ApiTestCaseTest extends WebTestCase
     public function methodNotSupportedReturnsMethodNotAllowed()
     {
         $this->patch('/v2/pet/findByStatus', []);
-
     }
 }
